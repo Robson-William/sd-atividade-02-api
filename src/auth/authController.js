@@ -1,21 +1,21 @@
 import { getGoogleUser } from "./getUser.js";
 import jwt from "jsonwebtoken";
+import {config} from "dotenv";
+
+config();
 
 export const login = async(req, res) => {
-    try {
-        const user = getGoogleUser(access_token);
+    const {credential} = req.body;
 
-        const token = await jwt.sign(user.id, process.env.JWT_SECRET, {expiresIn: "1d"})
+    const user = getGoogleUser(credential);
 
-        req.session.user = user;
+    const token = jwt.sign({userId: user.sub}, process.env.JWT_SECRET, { expiresIn: 3600 });
 
-        const tokenBearer = `Bearer ${token}`;
-        res.cookie("access_token", tokenBearer, {maxAge: 3600000});
-        res.set("Authorization", tokenBearer);
-		res.redirect("/livros");
-    } catch(err) {
-        console.log(err)
-    }
+    const tokenBearer = `Bearer ${token}`;
+
+    res.cookie('access_token', tokenBearer, {maxAge: 3600000, httponly: false});
+	res.set('Authorization', tokenBearer);
+    return res.json({user, token});
 }
 
 export const logout = async(req, res) => {

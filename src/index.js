@@ -1,6 +1,7 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
+import cors from "cors";
 import {router} from "./router.js";
 import { config } from 'dotenv';
 
@@ -17,6 +18,11 @@ app.use(session({
     cookie: {maxAge: 7 * 24 * 60 * 60 * 1000}
 }))
 
+app.use(express.urlencoded());
+app.use(express.json());
+app.use(cors({
+    credentials: true
+}));
 app.use(router);
 
 app.listen(3000, console.log("Api rodando na porta 8000"));
